@@ -1,3 +1,6 @@
+Version 0.1.2.0 2020-05-21 by luispedro
+	* Update to zstd 1.4.5 (PR #2 by Vanessa McHale)
+
 Version 0.1.1.2 2019-05-20 by luispedro
 	* Re-release v0.1.1.1 with updated info
 

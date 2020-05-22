@@ -1,5 +1,5 @@
 name:                zstd
-version:             0.1.1.2
+version:             0.1.2.0
 synopsis:            Haskell bindings to the Zstandard compression algorithm
 description:
   A fast lossless compression algorithm, targeting real-time

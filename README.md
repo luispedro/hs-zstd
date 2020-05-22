@@ -1,9 +1,13 @@
 # Zstandard bindings for Haskell
 
-[![Travis](https://api.travis-ci.org/luispedro/hs-zstd.png)](https://travis-ci.org/luispedro/hs-zstd)
+[![Travis](https://api.travis-ci.com/luispedro/hs-zstd.png)](https://travis-ci.com/luispedro/hs-zstd)
 
 This library provides Haskell bindings to the
 [Zstandard compression library](http://facebook.github.io/zstd/).
+
+Note that is now the official repositoryc for the
+[zstd](https://hackage.haskell.org/package/zstd) Haskell package. The original
+authors (Facebook) are no longer interested in maintaining it.
 
 The library is structured to provide several layers of abstraction.
 
@@ -14,12 +18,13 @@ The library is structured to provide several layers of abstraction.
 * If you need to stream a large amount of data with a constant memory
   footprint, use the
   [`Zstd.Streaming`](http://hackage.haskell.org/package/zstd/docs/Codec-Compression-Zstd-Streaming.html)
-  module. This can also be used as a building block for adapting to
-  streaming libraries such as `pipes` and `conduit`.  (If you need to
-  use lazy bytestrings instead, see the
+  module. See also the
+  [`conduit-zstd`](https://hackage.haskell.org/package/conduit-zstd) package
+  which provides a very thin wrapper to integrate with the `conduit` library.
+  If you need to use lazy bytestrings instead, see the
   [`Zstd.Lazy`](http://hackage.haskell.org/package/zstd/docs/Codec-Compression-Zstd-Lazy.html)
-  module.  This is built using the abstractions from the
-  `Zstd.Streaming` module.)
+  module. This is built using the abstractions from the `Zstd.Streaming`
+  module.
 
 * When your usage is dominated by lots of small messages (presumably
   using pre-computed compression dictionaries), use the

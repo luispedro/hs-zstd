@@ -11,7 +11,7 @@ functionality.
 
 If you run into problems with either the code, documentation, or
 examples, please
-[file a GitHub issue](https://github.com/facebookexperimental/hs-zstd/issues).
+[file a GitHub issue](https://github.com/luispedro/hs-zstd/issues).
 
 (Note: if you'd like to file an issue requesting new functionality,
 rather than bugfixes, please plan to implement that functionality
@@ -29,32 +29,17 @@ request that you follow the conventions below.
 3. If you're changing APIs, please update the appropriate
    documentation and examples, and the [changelog](changelog.md).
    (Breaking API changes have a high bar for approval.)
-4. Ensure that the test suite passes (`cabal test`).
+4. Ensure that the test suite passes (`stack build --test`).
 5. Make sure your code conforms to the existing style you see in the
    code base.
 6. Tidy up your commit history before submitting a pull request.  This
    means one commit per logical change, please.
-7. If you haven't yet done so, please complete our Contributor License
-   Agreement ("CLA").
-
-## Contributor License Agreement ("CLA")
-
-In order to accept your pull request, we need you to submit a CLA. You
-only need to do this once, after which you can work on any of
-Facebook's open source projects.
-
-Complete your CLA here: <https://code.facebook.com/cla>
 
 ## Issues
 
 We use GitHub issues to track public bugs.  Please ensure that your
 description is clear and has sufficient instructions for us be able to
 reproduce the issue.
-
-Facebook has a [bounty program](https://www.facebook.com/whitehat/)
-for the safe disclosure of security bugs. In those cases, please go
-through the process outlined on that page and do not file a public
-issue.
 
 ## License
 
