@@ -145,10 +145,10 @@ compressUsingCDict :: CCtx
                    -> ByteString
                    -- ^ Payload to compress.
                    -> IO ByteString
-compressUsingCDict (CCtx ctx) (CD fp) bs =
+compressUsingCDict (CCtx ctx) (CD l fp) bs =
   withForeignPtr fp $ \dict -> do
     let compressor dp dl sp sl _ = C.compressUsingCDict ctx dp dl sp sl dict
-    compressWith "compressUsingCDict" compressor 0 bs
+    compressWith "compressUsingCDict" compressor l bs
 
 -- | Create a pre-digested compression dictionary.
 createDDict :: Dict             -- ^ Dictionary.
