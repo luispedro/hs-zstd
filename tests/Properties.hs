@@ -17,7 +17,9 @@ module Properties
     ) where
 
 import Codec.Compression.Zstd
+import qualified Codec.Compression.Zstd.Advanced as A
 import qualified Codec.Compression.Zstd.Lazy as L
+import qualified Codec.Compression.Zstd.Parallel as P
 import qualified Codec.Compression.Zstd.Streaming as S
 import Codec.Compression.Zstd.Streaming (Result(..))
 import Data.ByteString (ByteString, pack, unpack)
@@ -60,6 +62,17 @@ t_stream_lazy_compress (CLevel n) = unsquare $ \cs ds s ->
 t_stream_roundtrip (CLevel n) cs s =
   (B.concat . stream S.decompress cs . L.toStrict . L.compress n . L.fromStrict) s == s
 
+t_parallel_roundtrip (CLevel n) (NE s) =
+  forAll (elements supportedWorkerCounts) $ \workers ->
+    decompress (P.compress workers n s) == Decompress s
+  where
+    -- Pick worker counts to exercise; fall back to single-threaded mode if
+    -- @libzstd@ was built without multi-threaded support.
+    supportedWorkerCounts :: [Int]
+    supportedWorkerCounts
+      | A.hasMultithreadedSupport = [0, 1, 2, 4]
+      | otherwise                 = [0]
+
 tests :: Test
 tests = testGroup "properties" [
     testProperty "rechunk" t_rechunk
@@ -69,4 +82,5 @@ tests = testGroup "properties" [
   , testProperty "lazy_compress_equiv" t_lazy_compress_equiv
   , testProperty "stream_lazy_compress" t_stream_lazy_compress
   , testProperty "stream_roundtrip" t_stream_roundtrip
+  , testProperty "parallel_roundtrip" t_parallel_roundtrip
   ]

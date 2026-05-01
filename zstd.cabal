@@ -41,6 +41,7 @@ library
     Codec.Compression.Zstd.Base
     Codec.Compression.Zstd.Efficient
     Codec.Compression.Zstd.FFI
+    Codec.Compression.Zstd.Parallel
     Codec.Compression.Zstd.Streaming
     Codec.Compression.Zstd.Types
     Codec.Compression.Zstd
