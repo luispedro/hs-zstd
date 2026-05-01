@@ -23,6 +23,7 @@ module Codec.Compression.Zstd.Internal
       CCtx(..)
     , DCtx(..)
     , compressWith
+    , compress2With
     , decompressWith
     , decompressedSize
     , withCCtx
@@ -51,16 +52,41 @@ compressWith
     -> Int
     -> ByteString
     -> IO ByteString
-compressWith name compressor level (PS sfp off len)
+compressWith name compressor level bs
   | level < 1 || level > C.maxCLevel
               = bail name "unsupported compression level"
   | otherwise =
+      withCompressBuffers name
+          (\dst dlen src slen ->
+              compressor dst dlen src slen (fromIntegral level))
+          bs
+
+-- | Like 'compressWith' but for the advanced @ZSTD_compress2@ entry point.
+-- 
+-- /NOTE/: Does not accept an argument for compression level, as this must be
+-- ambiently set on the compression context within the compressor closure.
+compress2With
+    :: String
+    -> (Ptr Word8 -> CSize -> Ptr Word8 -> CSize -> IO CSize)
+    -> ByteString
+    -> IO ByteString
+compress2With = withCompressBuffers
+
+-- | Allocate a destination buffer sized via 'C.compressBound' and run
+-- a compressor over the source bytestring.
+--
+-- Shrinks small outputs to avoid retaining the full bound-sized buffer.
+withCompressBuffers :: String
+                    -> (Ptr Word8 -> CSize -> Ptr Word8 -> CSize -> IO CSize)
+                    -> ByteString
+                    -> IO ByteString
+withCompressBuffers name compressor (PS sfp off len) =
   withForeignPtr sfp $ \sp -> do
     maxSize <- C.compressBound (fromIntegral len)
     dfp <- B.mallocByteString (fromIntegral maxSize)
     withForeignPtr dfp $ \dst -> do
       let src = sp `plusPtr` off
-      csz <- compressor dst maxSize src (fromIntegral len) (fromIntegral level)
+      csz <- compressor dst maxSize src (fromIntegral len)
       handleError csz name $ do
         let size = fromIntegral csz
         if csz < 128 || csz >= maxSize `div` 2
