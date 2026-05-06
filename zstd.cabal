@@ -37,6 +37,7 @@ flag standalone
 
 library
   exposed-modules:
+    Codec.Compression.Zstd.Advanced
     Codec.Compression.Zstd.Base
     Codec.Compression.Zstd.Efficient
     Codec.Compression.Zstd.FFI
