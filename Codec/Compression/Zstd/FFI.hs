@@ -106,7 +106,26 @@ module Codec.Compression.Zstd.FFI
     , p_freeDDict
     , decompressUsingDDict
 
+    -- * Advanced API
+    , c_compress2
+    , c_compressStream2
+    , cCtxSetParameter
+    , cCtxReset
+
     -- * Low-level code
+    -- ** Parameter and directive constants
+    , zstd_c_compressionLevel
+    , zstd_c_nbWorkers
+    , zstd_c_jobSize
+    , zstd_c_overlapLog
+    , zstd_e_continue
+    , zstd_e_flush
+    , zstd_e_end
+    , zstd_reset_session_only
+    , zstd_reset_parameters
+    , zstd_reset_session_and_parameters
+
+    -- ** Helper functions
     , c_maxCLevel
     ) where
 
@@ -459,3 +478,71 @@ checkError act = do
   return $! if isError ret
             then Left (getErrorName ret)
             else Right ret
+
+-- | Compress bytes from source buffer into destination buffer using sticky
+-- parameters previously set on the 'CCtx' via 'cCtxSetParameter'.
+--
+-- Always starts a new frame; any previously-buffered partial frame state on
+-- the context is discarded.
+-- 
+-- Returns the number of bytes written into destination buffer, or an error
+-- code if it fails (which can be tested using 'isError').
+--
+-- /NOTE/: 'safe' because this can block when @ZSTD_c_nbWorkers >= 1@.
+foreign import ccall safe "ZSTD_compress2"
+    c_compress2 :: Ptr CCtx     -- ^ Compression context.
+                -> Ptr dst      -- ^ Destination buffer.
+                -> CSize        -- ^ Capacity of destination buffer.
+                -> Ptr src      -- ^ Source buffer.
+                -> CSize        -- ^ Size of source buffer.
+                -> IO CSize
+
+-- | Consume part or all of an input, returning either @0@ (indicating that all
+-- internally buffered data has been flushed and the current operation is
+-- complete) or the minimum number of bytes left to flush.
+-- 
+-- Returns the minimum number of bytes left to flush, @0@ (indicating that all
+-- internally buffered data and the current operation is complete), or an error
+-- code if it fails (which can be tested using 'isError').
+--
+-- The 'CInt' end-directive is one of 'zstd_e_continue' (corresponds to
+-- 'compressStream'), 'zstd_e_flush', or 'zstd_e_end' (corresponds to
+-- 'endStream').
+--
+-- /NOTE/: 'safe' because this can block when @ZSTD_c_nbWorkers >= 1@.
+foreign import ccall safe "ZSTD_compressStream2"
+    c_compressStream2 :: Ptr CCtx          -- ^ Compression context.
+                      -> Ptr (Buffer Out)  -- ^ Output buffer.
+                      -> Ptr (Buffer In)   -- ^ Input buffer.
+                      -> CInt              -- ^ ZSTD_EndDirective.
+                      -> IO CSize
+
+-- | Set a compression parameter on the context.
+--
+-- Parameters are sticky: they apply to every subsequent compression call made
+-- with the given 'CCtx' until reset via 'cCtxReset' with 'zstd_reset_parameters'
+-- or 'zstd_reset_session_and_parameters', or overwritten by another
+-- 'cCtxSetParameter' call.
+-- 
+-- Returns @0@ on success or an error code (which can be tested using 'isError').
+--
+-- /NOTE/: This behavior does __not__ apply to 'compressCCtx', which takes its
+-- compression level inline and does not honor sticky parameters.
+foreign import ccall unsafe "ZSTD_CCtx_setParameter"
+    cCtxSetParameter :: Ptr CCtx
+                     -> CInt   -- ^ ZSTD_cParameter (e.g. 'zstd_c_nbWorkers').
+                     -> CInt   -- ^ Parameter value.
+                     -> IO CSize
+
+-- | Reset the compression context; fails if the directive is invalid for the
+-- current context state.
+--
+-- Returns @0@ on success or an error code (which can be tested using 'isError').
+-- 
+-- Should be called with one of the reset directive constants:
+-- 
+-- * 'zstd_reset_session_only'
+-- * 'zstd_reset_parameters'
+-- * 'zstd_reset_session_and_parameters'
+foreign import ccall unsafe "ZSTD_CCtx_reset"
+    cCtxReset :: Ptr CCtx -> CInt -> IO CSize
