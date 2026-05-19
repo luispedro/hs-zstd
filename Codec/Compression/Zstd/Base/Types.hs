@@ -22,7 +22,7 @@ import Foreign.ForeignPtr (ForeignPtr)
 import qualified Codec.Compression.Zstd.FFI.Types as FFI
 
 -- | A pre-digested compression dictionary.
-newtype CDict = CD (ForeignPtr FFI.CDict)
+data CDict = CD Int (ForeignPtr FFI.CDict)
 
 -- | A pre-digested decompression dictionary.
 newtype DDict = DD (ForeignPtr FFI.DDict)

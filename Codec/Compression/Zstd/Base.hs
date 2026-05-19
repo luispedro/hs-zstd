@@ -335,7 +335,7 @@ createCDict dict size level = do
   cd <- FFI.checkAlloc "createCDict" $
         FFI.createCDict dict (fromIntegral size) (fromIntegral level)
   fp <- newForeignPtr FFI.p_freeCDict cd
-  return (CD fp)
+  return (CD level fp)
 
 -- | Compress bytes from source buffer into destination buffer, using
 -- a pre-digested dictionary.  The destination buffer must be already
@@ -351,7 +351,7 @@ compressUsingCDict
     -> Int         -- ^ Size of source buffer.
     -> CDict       -- ^ Dictionary.
     -> IO (Either String Int)
-compressUsingCDict ctx dst dstSize src srcSize (CD fp) =
+compressUsingCDict ctx dst dstSize src srcSize (CD _ fp) =
   checkError . withForeignPtr fp $ \ dict ->
   FFI.compressUsingCDict ctx dst (fromIntegral dstSize)
     src (fromIntegral srcSize) dict
